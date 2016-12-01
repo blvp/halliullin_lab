@@ -59,16 +59,16 @@
 
 
 <script id="gammaBetaTemplate" type="doT/template">
-    <div class="row panel panel-default panel-group">
+    <div class="row">
         <div class="col-md-12">
-            <div class="panel-heading">
-                <span class="panel-title">
+            <div class="">
+                <span class="">
                         S_n: {{=it.scur }} B_n: {{=it.b }}
                 </span>
             </div>
-            <div class="row panel-collapse"
+            <div class="row"
                  id="js-solution{{=it.iter}}_{{=it.splus}}_{{=it.sminus}}_collapse">
-                <div class="col-md-12 panel-body panel-group panel"
+                <div class="col-md-12"
                      id="js-solution{{=it.iter}}_{{=it.splus}}_{{=it.sminus}}">
                     <div class="row">
                         <div class="col-md-6">
@@ -82,6 +82,20 @@
                                     <td>{{=it.gamma}}</td>
                                     <td>{{=it.beta}}</td>
                                 </tr>
+                                <tr>
+                                    <td>Выплаты Банку</td>
+                                    <td>Выплата покупателю опциона</td>
+                                </tr>
+                                <tr>
+                                    <td>{{=it.bankPayment}}</td>
+                                    <td>{{=it.optionPayment}}</td>
+                                </tr>
+                                <tr>
+                                    <td>Итоговый капитал</td>
+                                </tr>
+                                <tr>
+                                    <td>{{=it.total}}</td>
+                                </tr>
                                 </tbody>
                             </table>
                         </div>
@@ -92,14 +106,14 @@
                                         class="btn btn-success js-action"
                                         data-scur="{{=it.splus}}"
                                         data-iter="{{=it.iter}}"
-                                        data-rel="#js-solution{{=it.iter}}_{{=it.splus}}_{{=it.sminus}}"
+                                        data-rel="#contentData"
                                 >+
                                 </button>
                                 <button type="button"
                                         class="btn btn-danger js-action"
                                         data-scur="{{=it.sminus}}"
                                         data-iter="{{=it.iter}}"
-                                        data-rel="#js-solution{{=it.iter}}_{{=it.splus}}_{{=it.sminus}}"
+                                        data-rel="#contentData"
                                 >-
                                 </button>
                                 <!-- rel where to append next result -->
@@ -205,7 +219,7 @@
             var n = $this.data('iter');
             var gamma = solution.calculateGamma(n, S_prev);
             var beta = solution.calculateBeta(n, S_prev);
-            $($this.data('rel')).append(gammaBetaTemplateFn({
+            var html = gammaBetaTemplateFn({
                 showControls: solution.validateIter(n + 1) && (beta != 0 || gamma != 0),
                 gamma: gamma,
                 beta: beta,
@@ -213,8 +227,13 @@
                 b: solution.bs[n],
                 splus: solution.nextS(S_prev, 'up'),
                 sminus: solution.nextS(S_prev, 'down'),
+                bankPayment: Math.abs(beta * solution.bs[n]),
+                optionPayment: Math.max(0, S_prev - solution.strike),
+                total: gamma * S_prev,
                 iter: n + 1
-            }));
+            });
+            console.log(html);
+            $($this.data('rel')).append(html);
             initHandlers(solution);
             //disable button after it clicked
             $this.off();
