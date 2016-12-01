@@ -203,11 +203,10 @@
             var $this = $(this);
             var S_prev = $this.data('scur');
             var n = $this.data('iter');
-
             var gamma = solution.calculateGamma(n, S_prev);
             var beta = solution.calculateBeta(n, S_prev);
             $($this.data('rel')).append(gammaBetaTemplateFn({
-                showControls: solution.validateIter(n) && (beta != 0 || gamma != 0),
+                showControls: solution.validateIter(n + 1) && (beta != 0 || gamma != 0),
                 gamma: gamma,
                 beta: beta,
                 scur: S_prev,
@@ -236,7 +235,7 @@
             var opts = extractOptions();
             try {
                 solution = new Solution(opts.B, opts.S, opts.K, opts.N, opts.a, opts.b, opts.r);
-                var iter = 2
+                var iter = 1;
                 var initResult = initResultTemplateFn({
                     pStar: solution.p_star,
                     CN: solution._C_N,
