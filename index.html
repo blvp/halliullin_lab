@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>EUR stock market</title>
+    <link rel="stylesheet" href="bootstrap.min.css">
+</head>
+<body>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="form-horizontal">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="S0">S_0</label>
+                            <input class="form-control" type="number" id="S0">
+                        </div>
+                        <div class="form-group">
+                            <label for="B0">B_0</label>
+                            <input class="form-control" type="number" id="B0">
+                        </div>
+                        <div class="form-group">
+                            <label for="r">r</label>
+                            <input class="form-control" type="number" id="r">
+                        </div>
+                        <div class="form-group">
+                            <label for="a">a</label>
+                            <input class="form-control" type="number" id="a">
+                        </div>
+                    </div>
+                    <div class="col-md-offset-1 col-md-4">
+                        <div class="form-group">
+                            <label for="b">b</label>
+                            <input class="form-control" type="number" id="b">
+                        </div>
+                        <div class="form-group">
+                            <label for="N">Iterations</label>
+                            <input class="form-control" type="number" id="N">
+                        </div>
+                        <div class="form-group">
+                            <label for="K">Strike</label>
+                            <input class="form-control" type="number" id="K">
+                        </div>
+                        <div class="form-group">
+                            <button type="button" class="btn btn-lg btn-default" id="initialize">Начать анализ</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12" id="contentData">
+        </div>
+    </div>
+</div>
+
+
+<script id="gammaBetaTemplate" type="doT/template">
+    <div class="row panel panel-default panel-group">
+        <div class="col-md-12">
+            <div class="panel-heading">
+                <span class="panel-title">
+                        S_n: {{=it.scur }} B_n: {{=it.b }}
+                </span>
+            </div>
+            <div class="row panel-collapse"
+                 id="js-solution{{=it.iter}}_{{=it.splus}}_{{=it.sminus}}_collapse">
+                <div class="col-md-12 panel-body panel-group panel"
+                     id="js-solution{{=it.iter}}_{{=it.splus}}_{{=it.sminus}}">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <table class="table">
+                                <tbody>
+                                <tr>
+                                    <td>gamma</td>
+                                    <td>beta</td>
+                                </tr>
+                                <tr>
+                                    <td>{{=it.gamma}}</td>
+                                    <td>{{=it.beta}}</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            {{? it.showControls }}
+                            <div class="btn-group">
+                                <button type="button"
+                                        class="btn btn-success js-action"
+                                        data-scur="{{=it.splus}}"
+                                        data-iter="{{=it.iter}}"
+                                        data-rel="#js-solution{{=it.iter}}_{{=it.splus}}_{{=it.sminus}}"
+                                >+
+                                </button>
+                                <button type="button"
+                                        class="btn btn-danger js-action"
+                                        data-scur="{{=it.sminus}}"
+                                        data-iter="{{=it.iter}}"
+                                        data-rel="#js-solution{{=it.iter}}_{{=it.splus}}_{{=it.sminus}}"
+                                >-
+                                </button>
+                                <!-- rel where to append next result -->
+                            </div>
+                            {{??}}
+                            <h4>Последний шаг или beta и gamma равны 0</h4>
+                            {{?}}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</script>
+<script id="initResultTemplate" type="doT/template">
+    <div class="row">
+        <div class="col-md-6">
+            <table class="table">
+                <tbody>
+                <tr>
+                    <td>p*</td>
+                    <td>
+                        <div>{{= it.pStar }}</div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>C_N</td>
+                    <td>
+                        <div>{{= it.CN }}</div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Gamma 1</td>
+                    <td>
+                        <div>{{= it.gamma_1 }}</div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Beta 1</td>
+                    <td>
+                        <div>{{= it.beta_1}}</div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="col-md-6">
+            {{? it.showControls }}
+            <div class="btn-group">
+                <button type="button"
+                        class="btn btn-success js-action"
+                        data-scur="{{=it.splus}}"
+                        data-iter="{{=it.iter}}"
+                        data-rel="#contentData"
+                >+
+                </button>
+                <button type="button"
+                        class="btn btn-danger js-action"
+                        data-scur="{{=it.sminus}}"
+                        data-iter="{{=it.iter}}"
+                        data-rel="#contentData"
+                >-
+                </button>
+                <!-- rel where to append next result -->
+            </div>
+            {{??}}
+            <h1>End of iteration</h1>
+            {{?}}
+        </div>
+    </div>
+</script>
+<script src="src/math.js"></script>
+<script src="src/helpers.js"></script>
+<script src="src/jquery.js"></script>
+<script src="src/bootstrap.min.js"></script>
+<script src="src/dot.min.js"></script>
+<script src="src/solution.js"></script>
+<script>
+    function showInitResult(solution) {
+        $('#initResult').show();
+        $('#p_star').text(solution.p_star);
+        $('#C_N').text(solution._C_N);
+        $('#gamma_1').text(solution.first_gamma);
+        $('#beta_1').text(solution.first_beta);
+    }
+    function extractOptions() {
+        return {
+            B: parseFloat($('#B0').val()),
+            S: parseFloat($('#S0').val()),
+            K: parseFloat($('#K').val()),
+            N: parseFloat($('#N').val()),
+            a: parseFloat($('#a').val()),
+            b: parseFloat($('#b').val()),
+            r: parseFloat($('#r').val())
+        }
+    }
+
+    function initHandlers(solution) {
+        $('.js-action').off().not('.js-disabled').on('click', function (evt) {
+            evt.preventDefault();
+            var $this = $(this);
+            var S_prev = $this.data('scur');
+            var n = $this.data('iter');
+
+            var gamma = solution.calculateGamma(n, S_prev);
+            var beta = solution.calculateBeta(n, S_prev);
+            $($this.data('rel')).append(gammaBetaTemplateFn({
+                showControls: solution.validateIter(n) && (beta != 0 || gamma != 0),
+                gamma: gamma,
+                beta: beta,
+                scur: S_prev,
+                b: solution.bs[n],
+                splus: solution.nextS(S_prev, 'up'),
+                sminus: solution.nextS(S_prev, 'down'),
+                iter: n + 1
+            }));
+            initHandlers(solution);
+            //disable button after it clicked
+            $this.off();
+            $this.addClass('js-disabled').addClass('disabled')
+        });
+
+        $('.collapse').collapse();
+
+    }
+
+    $(document).ready(function () {
+        window.gammaBetaTemplateFn = doT.template($('#gammaBetaTemplate').text());
+        window.initResultTemplateFn = doT.template($('#initResultTemplate').text());
+        var solution;
+        $('#initialize').on('click', function (evt) {
+            evt.preventDefault();
+
+            var opts = extractOptions();
+            try {
+                solution = new Solution(opts.B, opts.S, opts.K, opts.N, opts.a, opts.b, opts.r);
+                var initResult = initResultTemplateFn({
+                    pStar: solution.p_star,
+                    CN: solution._C_N,
+                    gamma_1: solution.first_gamma,
+                    beta_1: solution.first_beta,
+                    showControls: solution.first_gamma != 0 && solution.first_beta != 0,
+                    scur: opts.S,
+                    splus: solution.nextS(opts.S, 'up'),
+                    sminus: solution.nextS(opts.S, 'down'),
+                    iter: 2
+                });
+                $('#contentData').html(initResult);
+                initHandlers(solution);
+            } catch (err) {
+                alert(err.message);
+            }
+        });
+
+    });
+
+</script>
+</body>
+</html>
