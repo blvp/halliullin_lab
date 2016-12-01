@@ -9,7 +9,7 @@ var Solution = function (B_0, S_0, K, N, a, b, r) {
     validate(a, b, r);
     this.p_star = (r - a) / (b - a);
     this.calculateBS();
-    this._C_N = this._F(S_0, this.p_star, N);
+    this._C_N = Math.pow(1 + r, -N) * this._F(S_0, this.p_star, N);
     this.first_gamma = this.calculateGamma(1, S_0);
     this.first_beta = this.calculateBeta(1, S_0);
 };
@@ -32,7 +32,7 @@ Solution.prototype.calculateGamma = function (n, S_prev) {
         ) / (S_prev * (this.b - this.a))
 };
 Solution.prototype.calculateBeta = function (n, S_prev) {
-    return this._F(S_prev, this.p_star, this.steps - n + 1) / this.bs[n] -
+    return this._F(S_prev, this.p_star, this.steps - n + 1) / this.bs[this.steps] -
         Math.pow((1 + this.r), -(this.steps - n)) *
         (
             this._F(S_prev * (1 + this.b), this.p_star, this.steps - n) -
