@@ -236,16 +236,17 @@
             var opts = extractOptions();
             try {
                 solution = new Solution(opts.B, opts.S, opts.K, opts.N, opts.a, opts.b, opts.r);
+                var iter = 2
                 var initResult = initResultTemplateFn({
                     pStar: solution.p_star,
                     CN: solution._C_N,
                     gamma_1: solution.first_gamma,
                     beta_1: solution.first_beta,
-                    showControls: solution.first_gamma != 0 && solution.first_beta != 0,
+                    showControls: solution.validateIter(iter) && (solution.first_gamma != 0 || solution.first_beta != 0),
                     scur: opts.S,
                     splus: solution.nextS(opts.S, 'up'),
                     sminus: solution.nextS(opts.S, 'down'),
-                    iter: 2
+                    iter: iter
                 });
                 $('#contentData').html(initResult);
                 initHandlers(solution);
@@ -253,7 +254,6 @@
                 alert(err.message);
             }
         });
-
     });
 
 </script>
