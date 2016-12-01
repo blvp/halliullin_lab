@@ -26,7 +26,7 @@ Solution.prototype.nextS = function (S_cur, state) {
 };
 
 Solution.prototype.calculateGamma = function (n, S_prev) {
-    return Math.pow((1 + this.r), -(this.steps - 1)) * (
+    return Math.pow((1 + this.r), -(this.steps - n)) * (
             this._F(S_prev * (1 + this.b), this.p_star, this.steps - n) -
             this._F(S_prev * (1 + this.a), this.p_star, this.steps - n)
         ) / (S_prev * (this.b - this.a))
@@ -50,7 +50,7 @@ Solution.prototype.calculateBS = function () {
 };
 
 Solution.prototype.validateIter = function (n) {
-    return n < this.steps;
+    return n <= this.steps;
 };
 
 function validate(a, b, r) {
